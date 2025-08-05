@@ -36,7 +36,10 @@ public class TaskManager {
 
         try {
             String jsonContent = Files.readString(FILE_PATH);
-            parseTasksFromJson(storedTask, jsonContent);
+            String cleaned = jsonContent.trim().replaceAll("\\s", "");
+            if (!cleaned.isEmpty() && !cleaned.equals("[]")) {
+                parseTasksFromJson(storedTask, jsonContent);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

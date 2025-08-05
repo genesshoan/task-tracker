@@ -7,7 +7,7 @@ group = 'dev.shoangenes'
 version = '1.0-SNAPSHOT'
 
 application {
-    mainClass = 'dev.shoangenes.tasktracker.Main'
+    mainClass = 'dev.shoangenes.tasktracker.TaskManagerCLI'
 }
 
 java {
