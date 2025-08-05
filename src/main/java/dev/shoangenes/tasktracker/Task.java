@@ -121,8 +121,8 @@ class Task {
         String updatedAtStr = line[4].split(":", 2)[1].trim();
 
         int id = Integer.parseInt(idStr);
-        if (id < lastIdSaved) {
-            id = ++lastIdSaved;
+        if (id > lastIdSaved) {
+            lastIdSaved = id;
         }
         Status status = Status.valueOf(statusStr.toUpperCase().replace(" ", "_"));
         LocalDateTime createdAt = LocalDateTime.parse(createdAtStr, formatter);
@@ -142,7 +142,7 @@ class Task {
                 "{\"id\":%d,\"description\":\"%s\",\"status\":\"%s\",\"createdAt\":\"%s\",\"updatedAt\":\"%s\"}",
                 id,
                 description,
-                status.toString().toUpperCase(),
+                status.name(),
                 createdAt.format(formatter),
                 updatedAt.format(formatter)
         );
