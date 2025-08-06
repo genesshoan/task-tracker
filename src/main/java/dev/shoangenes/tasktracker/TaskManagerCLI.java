@@ -5,35 +5,46 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class TaskManagerCLI {
-
     public static void main(String[] args) {
-        TaskManager taskManager = new TaskManager();
-
-        if (args.length < 1) {
-            System.out.println("Usage: task-tracker <command> [arguments]");
-            return;
-        }
-
-        String command = args[0];
-
         try {
-            switch (command) {
-                case "help" -> handleHelp(args);
-                case "add" -> handleAdd(taskManager, args);
-                case "update" -> handleUpdate(taskManager, args);
-                case "delete" -> handleDelete(taskManager, args);
-                case "mark-in-progress" -> handleMarkInProgress(taskManager, args);
-                case "mark-done" -> handleMarkDone(taskManager, args);
-                case "list" -> handleList(taskManager, args);
-                default -> System.out.println("Unknown command, enter 'help' to display all commands");
-            }
-        } catch (NoSuchElementException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
+            TaskManager taskManager = new TaskManager();
 
-        taskManager.writeTasksToJson();
+            if (args.length < 1) {
+                System.out.println("Usage: task-tracker <command> [arguments]");
+                return;
+            }
+
+            String command = args[0];
+
+            try {
+                switch (command) {
+                    case "help" -> handleHelp(args);
+                    case "add" -> handleAdd(taskManager, args);
+                    case "update" -> handleUpdate(taskManager, args);
+                    case "delete" -> handleDelete(taskManager, args);
+                    case "mark-in-progress" -> handleMarkInProgress(taskManager, args);
+                    case "mark-done" -> handleMarkDone(taskManager, args);
+                    case "list" -> handleList(taskManager, args);
+                    default -> System.out.println("Unknown command, enter 'help' to display all commands");
+                }
+            } catch (NoSuchElementException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+
+            taskManager.writeTasksToJson();
+        } catch (TaskStorageException e) {
+            System.out.println("Fatal error: " + e.getMessage());
+            System.exit(1);
+        }
     }
 
+
+    /**
+     * Parses the ID from a string and prints an error message if the parsing fails.
+     *
+     * @param idStr the string to parse as an ID
+     * @return an Optional containing the parsed ID, or empty if parsing failed
+     */
     private static Optional<Integer> parseIdOrPrintError(String idStr) {
         try {
             return Optional.of(Integer.parseInt(idStr));
@@ -43,6 +54,12 @@ public class TaskManagerCLI {
         }
     }
 
+    /**
+     * Handles the 'help' command.
+     * If no arguments are provided, it prints the help message.
+     *
+     * @param args the command line arguments
+     */
     private static void handleHelp(String[] args) {
         if (args.length < 1) {
             System.out.println("Usage: task-tracker help [without arguments]");
@@ -51,6 +68,13 @@ public class TaskManagerCLI {
         printHelp();
     }
 
+    /**
+     * Handles the 'add' command to add a new task.
+     * If the description is missing, it prints an error message.
+     *
+     * @param taskManager the TaskManager instance to manage tasks
+     * @param args the command line arguments
+     */
     private static void handleAdd(TaskManager taskManager, String[] args) {
         if (args.length < 2) {
             System.out.println("Usage: task-tracker <description>");
@@ -61,6 +85,13 @@ public class TaskManagerCLI {
         System.out.println("Task added successfully.");
     }
 
+    /**
+     * Handles the 'update' command to update an existing task.
+     * If the ID or description is missing, it prints an error message.
+     *
+     * @param taskManager the TaskManager instance to manage tasks
+     * @param args the command line arguments
+     */
     private static void handleUpdate(TaskManager taskManager, String[] args) {
         if (args.length < 3) {
             System.out.println("Usage: task-tracker update <id> <description>");
@@ -73,6 +104,13 @@ public class TaskManagerCLI {
         System.out.println("Task with id " + id + " updated.");
     }
 
+    /**
+     * Handles the 'delete' command to delete an existing task.
+     * If the ID is missing or invalid, it prints an error message.
+     *
+     * @param taskManager the TaskManager instance to manage tasks
+     * @param args the command line arguments
+     */
     private static void handleDelete(TaskManager taskManager, String[] args) {
         if (args.length < 2) {
             System.out.println("Usage: task-tracker delete <id>");
@@ -85,6 +123,13 @@ public class TaskManagerCLI {
         System.out.println("Task with id " + id + " deleted.");
     }
 
+    /**
+     * Handles the 'mark-in-progress' command to mark a task as in progress.
+     * If the ID is missing or invalid, it prints an error message.
+     *
+     * @param taskManager the TaskManager instance to manage tasks
+     * @param args the command line arguments
+     */
     private static void handleMarkInProgress(TaskManager taskManager, String[] args) {
         if (args.length < 2) {
             System.out.println("Usage: task-tracker mark-in-progress <id>");
@@ -97,6 +142,13 @@ public class TaskManagerCLI {
         System.out.println("Task with id " + id + " marked in progress.");
     }
 
+    /**
+     * Handles the 'mark-done' command to mark a task as done.
+     * If the ID is missing or invalid, it prints an error message.
+     *
+     * @param taskManager the TaskManager instance to manage tasks
+     * @param args the command line arguments
+     */
     private static void handleMarkDone(TaskManager taskManager, String[] args) {
         if (args.length < 2) {
             System.out.println("Usage: task-tracker mark-done <id>");
@@ -109,6 +161,13 @@ public class TaskManagerCLI {
         System.out.println("Task with id " + id + " marked done.");
     }
 
+    /**
+     * Handles the 'list' command to print tasks based on the specified mode.
+     * If the mode is missing or invalid, it prints an error message.
+     *
+     * @param taskManager the TaskManager instance to manage tasks
+     * @param args the command line arguments
+     */
     private static void handleList(TaskManager taskManager, String[] args) {
         if (args.length < 2) {
             System.out.println("Usage: task-tracker list <mode: ALL, TODO, DONE, IN-PROGRESS>");
@@ -122,6 +181,9 @@ public class TaskManagerCLI {
         }
     }
 
+    /**
+     * Prints the help message with usage instructions and available commands.
+     */
     private static void printHelp(){
         System.out.println("Usage:");
         System.out.println("\tjava TaskManagerCLI <command> [arguments]");

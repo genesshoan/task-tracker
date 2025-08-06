@@ -3,22 +3,68 @@ package dev.shoangenes.tasktracker;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class TaskManager {
     // File path where tasks are stored in JSON format
-    private final Path FILE_PATH = Path.of("task.json");
+    private final Path FILE_PATH;
     // HashMap to store tasks with their unique IDs
-    private HashMap<Integer, Task> tasks;
+    private final HashMap<Integer, Task> tasks;
 
     /**
      * Constructor for TaskManager.
      * Initializes the task manager and reads tasks from the JSON file.
      */
     public TaskManager() {
+        FILE_PATH = getAppDataFolder();
+        ensureDirectoryExists();
         tasks = readTasksFromJson();
+    }
+
+    /**
+     * Returns the file path where tasks are stored.
+     *
+     * @return the Path object representing the tasks file
+     */
+    public Path getAppDataFolder() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        String userDir = System.getProperty("user.dir");
+        Path tasksDir;
+
+        if (osName.contains("win")) {
+            String baseDir = System.getenv("APPDATA");
+            tasksDir = Paths.get(baseDir, "TaskTracker");
+        } else if (osName.contains("mac")) {
+            tasksDir = Paths.get(userDir, "Library", "Application Support", "TaskTracker");
+        } else if (osName.contains("linux")) {
+            String xdgConfig = System.getenv("XDG_CONFIG_HOME");
+            if (xdgConfig != null) {
+                tasksDir = Paths.get(xdgConfig, "task-tracker");
+            } else {
+                tasksDir = Paths.get(userDir, ".config", "task-tracker");
+            }
+        } else {
+            throw new TaskStorageException("Unsupported OS: " + osName);
+        }
+        return tasksDir.resolve("tasks.json");
+    }
+
+    /**
+     * Ensures that the directory for storing tasks exists.
+     * If it does not exist, it creates the necessary directories.
+     */
+    private void ensureDirectoryExists() {
+        try {
+            Path taskTrackerDir = FILE_PATH.getParent();
+            if (!Files.exists(taskTrackerDir)) {
+                Files.createDirectories(taskTrackerDir);
+            }
+        } catch (IOException e) {
+            throw new TaskStorageException("Unable to create task tracker directory", e);
+        }
     }
 
     /**
@@ -41,7 +87,7 @@ public class TaskManager {
                 parseTasksFromJson(storedTask, jsonContent);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new TaskStorageException("Error reading tasks from JSON", e);
         }
 
         return storedTask;
@@ -84,7 +130,7 @@ public class TaskManager {
         try {
             Files.writeString(FILE_PATH, jsonContent);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new TaskStorageException("Error writing tasks to JSON", e);
         }
     }
 
@@ -158,13 +204,13 @@ public class TaskManager {
             switch (printMode) {
                 case ALL -> System.out.println(task.toString());
                 case TODO -> {
-                    if (task.getStatus() == Status.TODO) System.out.println(task.toString());
+                    if (task.getStatus() == Status.TODO) System.out.println(task);
                 }
                 case DONE -> {
-                    if (task.getStatus() == Status.DONE) System.out.println(task.toString());
+                    if (task.getStatus() == Status.DONE) System.out.println(task);
                 }
                 case IN_PROGRESS -> {
-                    if (task.getStatus() == Status.IN_PROGRESS) System.out.println(task.toString());
+                    if (task.getStatus() == Status.IN_PROGRESS) System.out.println(task);
                 }
             }
         }
