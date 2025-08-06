@@ -100,7 +100,8 @@ public class TaskManagerCLI {
         Optional<Integer> parsedId = parseIdOrPrintError(args[1]);
         if (parsedId.isEmpty()) return;
         int id = parsedId.get();
-        taskManager.updateTask(id, args[2]);
+        String description = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
+        taskManager.updateTask(id, description);
         System.out.println("Task with id " + id + " updated.");
     }
 

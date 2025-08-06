@@ -1,12 +1,10 @@
 package dev.shoangenes.tasktracker;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
@@ -15,7 +13,8 @@ import java.util.HashMap;
 import java.util.NoSuchElementException;
 
 public class TaskManagerTest {
-    private static final Path FILE_PATH = Path.of("task.json");
+    // Usar la misma ruta que TaskManager para asegurar consistencia
+    private static final Path FILE_PATH = new TaskManager().getAppDataFolder();
 
     @BeforeEach
     public void cleanFile() throws IOException {
